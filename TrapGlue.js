@@ -12,8 +12,12 @@ class TrapGlue extends Phaser.Physics.Arcade.Sprite
 
         //const enemyguy = this.group.create(this.key)
         this.health = 2;
+        //this.squirtRate = Math.random() * (1500 - 1000) + 1000;
+
         glueBullets = scene.physics;
         glueTime = scene.time;
+
+        glueClass = scene;
     }
 
     preload(){
@@ -29,16 +33,21 @@ class TrapGlue extends Phaser.Physics.Arcade.Sprite
     
         let vector = new Phaser.Math.Vector2(edx, edy);
         vector.setLength(trapGlueSpeed);
-        this.body.setVelocity(-vector.x, -vector.y);
+        this.body.setVelocity(vector.x, vector.y);
 
         // glue bullet?
 
         if (this.canSquirt == false) {
             return;
         }
-        let glueBullet = glueBullets.add.sprite(this.body.position.x, this.body.position.y, 'cheese').setScale(0.125);
+
+        let glueBullet = glueBullets.add.sprite(this.body.position.x, this.body.position.y, 'glue').setScale(0.25);
         glueBullet.body.setSize(50, 50);
         glueBullet.angle = player.angle - 45;
+
+        glueClass.enemyBullet.add(glueBullet);
+
+        //this.glueParticle.emitParticleAt(glueBullet.body.position.x, glueBullet.body.position.y, 4);
         
         //this.cheese.add(glueBullet);
         //this.physics.add.existing(cheeseBullet);
@@ -51,7 +60,7 @@ class TrapGlue extends Phaser.Physics.Arcade.Sprite
         glueBullet.body.setAngularVelocity(0);
 
         this.canSquirt = false;
-        this.timedEvent = glueTime.delayedCall(squirtRate, this.reloadGlue, [], this);
+        this.timedEvent = glueTime.delayedCall(Math.random() * (1000 - 100) + 100, this.reloadGlue, [], this);
     }
 
     reloadGlue ()
@@ -61,5 +70,7 @@ class TrapGlue extends Phaser.Physics.Arcade.Sprite
 }
 
 var glueBullets;
+var glueClass;
 var glueTime;
-var squirtRate = 500;
+var squirtRate = 1000;
+//console.log(squirtRate)

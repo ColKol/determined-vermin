@@ -11,7 +11,7 @@ class TrapSpring extends Phaser.Physics.Arcade.Sprite
         this.body.setCollideWorldBounds(true);
 
         //const enemyguy = this.group.create(this.key)
-        this.health = 1;
+        this.health = 2;
     }
 
     update(){

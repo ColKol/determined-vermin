@@ -16,8 +16,9 @@ class SceneGameplay extends Phaser.Scene{
 
         this.load.image('ground2', 'platformpixel.png');
 
+        this.load.image('glue', 'sprites/glue.png');
+
         this.canShoot = true;
-        this.reloadTime = 750;
     }
 
     create(){
@@ -26,10 +27,10 @@ class SceneGameplay extends Phaser.Scene{
 
         //this.add.rectangle(0, 0, 800, 32, 0x6666ff).setOrigin(0, 0);
         
-        platforms.create(0, 0, 'ground2').setScale(800, 50).setOrigin(0, 0).refreshBody();
-        platforms.create(0, 0, 'ground2').setScale(50, 600).setOrigin(0, 0).refreshBody();
-        platforms.create(0, 550, 'ground2').setScale(800, 50).setOrigin(0, 0).refreshBody();
-        platforms.create(750, 0, 'ground2').setScale(50, 600).setOrigin(0, 0).refreshBody();
+        platforms.create(0, 0, 'ground2').setScale(800, 32).setOrigin(0, 0).refreshBody();
+        platforms.create(0, 0, 'ground2').setScale(32, 600).setOrigin(0, 0).refreshBody();
+        platforms.create(0, 568, 'ground2').setScale(800, 32).setOrigin(0, 0).refreshBody();
+        platforms.create(768, 0, 'ground2').setScale(32, 600).setOrigin(0, 0).refreshBody();
         
 
         platforms.create(600, 400, 'ground');
@@ -76,8 +77,20 @@ class SceneGameplay extends Phaser.Scene{
             emitting: false
         });
 
+        var glueParticle = this.add.particles(0, 0, 'glue', {
+            lifespan: 500,
+            speed: { min: 200, max: 350 },
+            scale: { start: 0.2, end: 0 },
+            rotate: { start: 0, end: 360 },
+            gravityY: 200,
+            angle: { min: -100, max: -80 },
+            emitting: false
+        });
+
         // cheese group
         this.cheese = this.add.group();
+
+        this.enemyBullet = this.add.group();
 
         // enemy groups
         this.traps = this.physics.add.group({
@@ -98,8 +111,8 @@ class SceneGameplay extends Phaser.Scene{
         new TrapSpring(this, 400, 250);
         new TrapSpring(this, 600, 400);
 
-        new TrapGlue(this, 500, 400);
-        new TrapGlue(this, 600, 400);
+        new TrapGlue(this, 500, 600);
+        new TrapGlue(this, 600, 600);
 
         //trap.body.setVelocity(100, 100);
         /*
@@ -132,6 +145,22 @@ class SceneGameplay extends Phaser.Scene{
 
         // player touches mousetrap
         this.physics.add.overlap(player, this.traps, function (player, traps) {
+            ratParticle.emitParticleAt(player.body.position.x, player.body.position.y, 16);
+            playerDead = true;
+            player.disableBody(true, true);
+        });
+
+        // glue hits wall
+        this.physics.add.overlap(this.enemyBullet, platforms, function (bullet) {
+            glueParticle.emitParticleAt(bullet.body.position.x, bullet.body.position.y, 4);
+            bullet.destroy();
+        });
+
+        // glue hits player
+        this.physics.add.overlap(this.enemyBullet, player, function (bullet) {
+            glueParticle.emitParticleAt(bullet.body.position.x, bullet.body.position.y, 4);
+            bullet.destroy();
+
             ratParticle.emitParticleAt(player.body.position.x, player.body.position.y, 16);
             playerDead = true;
             player.disableBody(true, true);
@@ -189,7 +218,7 @@ class SceneGameplay extends Phaser.Scene{
             cheeseBullet.body.setAngularVelocity(bulletRotate);
 
             // set timer for shooting
-            this.timedEvent = this.time.delayedCall(this.reloadTime, this.reloadCheese, [], this);
+            this.timedEvent = this.time.delayedCall(reloadTime, this.reloadCheese, [], this);
             this.canShoot = false;
         }
 
@@ -210,6 +239,12 @@ class SceneGameplay extends Phaser.Scene{
     reloadCheese ()
     {
         this.canShoot = true;
+    }
+
+    killPlayer(){
+        ratParticle.emitParticleAt(player.body.position.x, player.body.position.y, 16);
+        playerDead = true;
+        player.disableBody(true, true);
     }
 }
 
@@ -252,6 +287,7 @@ var playerDead = false;
 // bullet
 var bulletSpeed = 1250;
 var bulletRotate = 1500;
+const reloadTime = 250;
 
 // enemies
 const trapSpringSpeed = 200;
